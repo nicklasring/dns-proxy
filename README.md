@@ -1,3 +1,5 @@
+Non production usage, sort of a dummy project to learn network topology and fooling around with DNS
+
 --------
 TODO Features
 --------
