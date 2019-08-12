@@ -10,6 +10,8 @@ class DNSProxyPrompt(Cmd):
         print(f'Setting template {name} to cidr: {cidr}.')
         self._templates[cidr] = name
 
+    # Scrap this, just read from blacklist.d and virtualhost config
+    # Do more fun stuff like statistics and shit control commands instead
     def do_if(self, args):
         if len(args) == 0:
             raise SyntaxError('No conditions set for if')
