@@ -1,4 +1,9 @@
 Non production usage, sort of a dummy project to learn network topology and fooling around with DNS
+--------
+TODO Structure
+--------
+1. Clean up
+2. Proper moduling /dns_proxy subfolder
 
 --------
 TODO Features
