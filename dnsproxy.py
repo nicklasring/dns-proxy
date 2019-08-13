@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-from socket import socket, AF_INET, SOCK_DGRAM, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_DGRAM, SOCK_STREAM, SHUT_WR
 from struct import unpack
 
 from dnsfirewall import DNSFirewall
@@ -28,7 +28,16 @@ class DNSProxy():
             relay_socket = socket(AF_INET, SOCK_DGRAM)
             relay_socket.connect((DNS_SERVERS[0], 53)) # TODO: Use random good DNS Server
             relay_socket.send(data)
+            response = relay_socket.recv(4096)
+            self._socket.sendto(response, self._client_address)
+            relay_socket.shutdown(SHUT_WR)
 
+        except Exception as E:
+            print(E)
+
+    def RelayFake(self, data):
+        try:
+            print('Relaying fake response')
         except Exception as E:
             print(E)
 
@@ -82,7 +91,7 @@ class DNSProxy():
 
     def Start(self):
         while True:
-            client_data, client_address = self._socket.recvfrom(1024)
+            client_data, self._client_address = self._socket.recvfrom(1024)
             
             transaction_id = unpack("!H", client_data[:2])[0]
             flags = unpack("!H", client_data[2:4])[0]
@@ -99,17 +108,19 @@ class DNSProxy():
 
             if not self._dns_firewall.IsAllowed(qname): 
                 print(f'---------\nDomain: {qname} is not allowed\n---------')
-                pass
-
-            qtype =  self.GetQType()
-            qclass = self.GetQClass()
-            
-            print(
-                f'Transaction ID: {transaction_id}\nFlags: {flags}\nQuestions: {questions}\nAnswer RRS: {answer_rrs}\nAuthority RRS {authority_rrs}\nAdditional RRS {additional_rrs}\nQuery Name: {qname}\nQuery Type: {qtype}\nQuery Class: {qclass}'''
-            )
-
-            print('Trying to send ...')
-            self.Relay(client_data)
+                self.RelayFake(client_data)
+                continue
+            else:
+                qtype =  self.GetQType()
+                qclass = self.GetQClass()
+                
+                print('-----------------------------------------------------------')
+                print(
+                    f'Transaction ID: {transaction_id}\nFlags: {flags}\nQuestions: {questions}\nAnswer RRS: {answer_rrs}\nAuthority RRS {authority_rrs}\nAdditional RRS {additional_rrs}\nQuery Name: {qname}\nQuery Type: {qtype}\nQuery Class: {qclass}'''
+                )
+                print('Relaying DNS Query ...')
+                
+                self.Relay(client_data)
 
 if __name__ == '__main__':
     DNSProxy().Start()
