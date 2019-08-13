@@ -26,7 +26,3 @@ class DNSFirewall():
             tmp_file.close()
         
         self._blacklist = blacklist
-
-''' dnsf = DNSFirewall()
-dnsf.SetDomain("dn.se")
-print(dnsf.IsAllowed()) '''
