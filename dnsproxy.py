@@ -7,6 +7,10 @@ from dnsfirewall import DNSFirewall
 
 SERVER_ADDRESS = '127.0.0.1'
 DNS_PORT = 53
+FLAGS = {
+    "QUERY": 0,
+    "RESPONSE": 1
+}
 DNS_SERVERS = [
     "1.1.1.1" # Quad9
 ]
@@ -35,29 +39,15 @@ class DNSProxy():
             print(E)
 
     def RelayFake(self, data):
+        request_header = data[:(12+self.GetQnameLength()+4)]
+        answer_localhost = b'\xc0\x0c\x00\x01\x00\x01\x00\x00\x03\x84\x00\x04\x7f\x00\x00\x01\x00\x00\x29\x05\xac\x00\x00\x00\x00\x00\x00'
+        request_header += answer_localhost
+
         try:
-            transaction_id = unpack("!H", data[:2])[0]
-            flags = unpack("!H", data[2:4])[0]
-            questions = unpack("!H", data[4:6])[0]
-            answer_rrs = unpack("!H", data[6:8])[0]
-            authority_rrs = unpack("!H", data[8:10])[0]
-            additional_rrs = unpack("!H", data[10:12])[0]
-
-            dns_request_length = 12 + self.GetQnameLength()
-
-            request_header = data
-            response_flag = pack('>L', 8180)
-            
-            ip_addr =  tuple(map(int,'1.2.3.4'.rstrip(".").split(".")))
-            pad_byte = pack('!x')
-            answer = pack('!H', 6)+pad_byte+pack('!H', 4)+pad_byte+pack('!BBBB', *ip_addr)
-            response = pack('!H', transaction_id) + response_flag + request_header[4:]
-
-            self._socket.sendto(response, self._client_address)
+            self._socket.sendto(request_header, self._client_address)
         except Exception as E:
             print(E)
-            print('shit')
-
+        
     def SetDNSPayload(self, payload):
         self._dns_payload = payload.split(b'\x00',1)
 
