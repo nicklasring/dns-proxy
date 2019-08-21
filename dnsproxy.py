@@ -39,6 +39,7 @@ class DNSProxy():
             print(E)
 
     def RelayFake(self, data):
+        # Todo: Why does this work, its a query not a response ?
         request_header = data[:(12+self.GetQnameLength()+4)]
         answer_localhost = b'\xc0\x0c\x00\x01\x00\x01\x00\x00\x03\x84\x00\x04\x7f\x00\x00\x01\x00\x00\x29\x05\xac\x00\x00\x00\x00\x00\x00'
         request_header += answer_localhost
