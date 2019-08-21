@@ -7,10 +7,6 @@ from dnsfirewall import DNSFirewall
 
 SERVER_ADDRESS = '127.0.0.1'
 DNS_PORT = 53
-FLAGS = {
-    "QUERY": 0,
-    "RESPONSE": 1
-}
 DNS_SERVERS = [
     "1.1.1.1" # Quad9
 ]
